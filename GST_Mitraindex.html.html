@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GST Calculator India – GST Mitra</title>
+<meta name="description" content="Free GST Calculator India. Calculate GST, CGST, SGST and IGST instantly. Search GST rates for products and services.">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"GST Mitra","applicationCategory":"FinanceApplication"}
+</script>
+<style>
+:root{--bg:#0f172a;--card:rgba(255,255,255,.12);--text:#fff;--accent:#38bdf8}
+body.light{--bg:#eef4ff;--card:rgba(255,255,255,.7);--text:#111}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#0f172a,#1e3a8a);color:var(--text);min-height:100vh}
+body.light{background:linear-gradient(135deg,#eef4ff,#dbeafe)}
+.wrap{max-width:1100px;margin:auto;padding:20px}
+.card{background:var(--card);backdrop-filter:blur(12px);padding:20px;border-radius:18px;margin:15px 0}
+input,select,button{padding:12px;border-radius:10px;border:none;margin:6px;width:100%}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.result{padding:12px;background:rgba(255,255,255,.08);border-radius:12px}
+table{width:100%;border-collapse:collapse} td{padding:8px;border-bottom:1px solid rgba(255,255,255,.15)}
+button{cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>GST Mitra</h1>
+<button onclick="document.body.classList.toggle('light')">🌙 Toggle Theme</button>
+
+<div class="card">
+<h2>GST Calculator</h2>
+<input id="amount" type="number" placeholder="Amount">
+<select id="rate">
+<option>0</option><option>5</option><option>12</option><option selected>18</option><option>28</option>
+</select>
+<select id="mode"><option value="add">Add GST</option><option value="remove">Remove GST</option></select>
+<select id="tax"><option value="intra">Intra-State</option><option value="inter">Inter-State</option></select>
+<div class="grid">
+<button onclick="calc()">Calculate</button>
+<button onclick="copyRes()">Copy</button>
+<button onclick="window.print()">Print/PDF</button>
+<button onclick="resetCalc()">Reset</button>
+</div>
+<div class="grid" id="results"></div>
+</div>
+
+<div class="card">
+<h2>GST Rate Finder</h2>
+<input id="search" placeholder="Search product/service..." oninput="filterItems()">
+<table><tbody id="items"></tbody></table>
+</div>
+
+<div class="card">
+<h2>GST Slab Guide</h2>
+<ul>
+<li>0% – Milk, fresh vegetables, books</li>
+<li>5% – Packaged food, restaurants</li>
+<li>12% – Processed foods, some consumer goods</li>
+<li>18% – Electronics, software, services</li>
+<li>28% – Luxury goods, automobiles, ACs</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>FAQ</h2>
+<details><summary>What is GST?</summary><p>Goods and Services Tax in India.</p></details>
+<details><summary>What is CGST?</summary><p>Central GST portion.</p></details>
+<details><summary>What is SGST?</summary><p>State GST portion.</p></details>
+<details><summary>What is IGST?</summary><p>Inter-state GST.</p></details>
+<details><summary>How to calculate GST?</summary><p>Amount × GST rate.</p></details>
+<details><summary>GST on mobile phones?</summary><p>Generally 18%.</p></details>
+<details><summary>GST on televisions?</summary><p>Often 18%.</p></details>
+<details><summary>GST on gold jewellery?</summary><p>Generally 3%.</p></details>
+<details><summary>GST on restaurant bills?</summary><p>Often 5%.</p></details>
+<details><summary>GST slab list in India?</summary><p>0%, 5%, 12%, 18%, 28%.</p></details>
+</div>
+</div>
+
+<script>
+const data=[];
+const base=[
+["Television","Electronics","18%"],["Mobile Phone","Electronics","18%"],["Laptop","Electronics","18%"],
+["Air Conditioner","Electronics","28%"],["Refrigerator","Electronics","18%"],["Restaurant Service","Food","5%"],
+["Milk","Food","0%"],["Tea","Food","5%"],["Car","Automobile","28%"],["Motorcycle","Automobile","28%"],
+["Gold Jewellery","Jewellery","3%"],["Books","Education","0%"]
+];
+for(let i=1;i<=100;i++){data.push([`Common Product ${i}`,"General","18%"]);}
+base.forEach(x=>data.unshift(x));
+
+function render(arr){
+document.getElementById('items').innerHTML=arr.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td>${x[2]}</td></tr>`).join('');
+}
+render(data);
+
+function filterItems(){
+let q=document.getElementById('search').value.toLowerCase();
+render(data.filter(x=>x.join(' ').toLowerCase().includes(q)));
+}
+
+function calc(){
+let amt=parseFloat(amount.value||0), rate=parseFloat(document.getElementById('rate').value);
+let mode=document.getElementById('mode').value, tax=document.getElementById('tax').value;
+let base=amt,gst=0;
+if(mode==='add'){gst=amt*rate/100;}
+else{base=amt/(1+rate/100);gst=amt-base;}
+let cgst=tax==='intra'?gst/2:0;
+let sgst=tax==='intra'?gst/2:0;
+let igst=tax==='inter'?gst:0;
+let finalAmt=mode==='add'?amt+gst:amt;
+results.innerHTML=`
+<div class=result>Base Amount: ₹${base.toFixed(2)}</div>
+<div class=result>GST Rate: ${rate}%</div>
+<div class=result>CGST: ₹${cgst.toFixed(2)}</div>
+<div class=result>SGST: ₹${sgst.toFixed(2)}</div>
+<div class=result>IGST: ₹${igst.toFixed(2)}</div>
+<div class=result>Total GST: ₹${gst.toFixed(2)}</div>
+<div class=result>Final Amount: ₹${finalAmt.toFixed(2)}</div>`;
+}
+function copyRes(){navigator.clipboard.writeText(results.innerText);}
+function resetCalc(){amount.value='';results.innerHTML='';}
+</script>
+</body>
+</html>
